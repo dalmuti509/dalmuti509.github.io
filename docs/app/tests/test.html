@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iOS HTML Test</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1d2330;
+    --accent: #4f6cff;
+  }
+  body.dark {
+    --bg: #12151c;
+    --card: #1e2330;
+    --text: #e8ecf5;
+    --accent: #ff9f43;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.4s, color 0.4s;
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 16px; }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: background 0.4s;
+  }
+  .card h2 { font-size: 1rem; margin: 0 0 10px; }
+  .status { font-weight: 600; }
+  .ok { color: #1fa463; }
+  .fail { color: #e5484d; }
+
+  button {
+    font-size: 1rem;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s, filter 0.15s;
+  }
+  button:active { transform: scale(0.92); filter: brightness(0.85); }
+
+  #count {
+    display: inline-block;
+    min-width: 2ch;
+    margin-left: 12px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+  #count.bump { animation: bump 0.3s ease; }
+  @keyframes bump {
+    50% { transform: scale(1.5); color: var(--accent); }
+  }
+
+  /* CSS-only interactivity: checkbox hack, no JavaScript involved */
+  .toggle-input { display: none; }
+  .toggle-label {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .panel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+  }
+  .toggle-input:checked ~ .panel { max-height: 120px; opacity: 1; }
+  .toggle-input:checked + .toggle-label { background: var(--accent); color: #fff; }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid rgba(127, 127, 127, 0.25);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .swatches { display: flex; gap: 10px; }
+  .swatch {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .swatch:hover, .swatch:active { transform: translateY(-6px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); }
+
+  #clock { font-variant-numeric: tabular-nums; font-size: 1.3rem; }
+</style>
+</head>
+<body>
+  <h1>📱 iOS HTML Test</h1>
+
+  <div class="card">
+    <h2>JavaScript status</h2>
+    <div id="js-status" class="status fail">❌ JavaScript is NOT running</div>
+    <noscript><div class="status fail">(noscript fallback shown)</div></noscript>
+  </div>
+
+  <div class="card">
+    <h2>Counter (JavaScript + CSS animation)</h2>
+    <button id="inc">Tap me</button>
+    <span id="count">0</span>
+  </div>
+
+  <div class="card">
+    <h2>Theme (JavaScript toggles a CSS class)</h2>
+    <button id="theme">Switch to dark</button>
+  </div>
+
+  <div class="card">
+    <h2>Live clock (JavaScript timer)</h2>
+    <div id="clock">--:--:--</div>
+  </div>
+
+  <div class="card">
+    <h2>Cookies</h2>
+    <div>Page loaded via: <code id="protocol">?</code></div>
+    <div id="cookie-status" class="status">Not tested yet</div>
+    <div>Cookie visits counter: <strong id="cookie-visits">–</strong></div>
+    <div>localStorage visits counter: <strong id="ls-visits">–</strong></div>
+    <p><button id="cookie-test">Run cookie test</button> <button id="cookie-clear">Clear</button></p>
+  </div>
+
+  <div class="card">
+    <h2>Network call to google.com</h2>
+    <div>Fetch: <span id="fetch-status" class="status">Not tested yet</span></div>
+    <div>Image load: <span id="img-status" class="status">Not tested yet</span></div>
+    <div id="img-holder"></div>
+    <p><button id="google-test">Call google.com</button></p>
+  </div>
+
+  <div class="card">
+    <h2>CSS-only toggle (works without JavaScript)</h2>
+    <input type="checkbox" id="t" class="toggle-input">
+    <label for="t" class="toggle-label">Show / hide</label>
+    <div class="panel">
+      <p>🎉 This panel opens with pure CSS (<code>:checked</code> selector).</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>CSS animations (no JavaScript)</h2>
+    <div class="spinner"></div>
+    <p>Tap a swatch:</p>
+    <div class="swatches">
+      <div class="swatch" style="background:#4f6cff"></div>
+      <div class="swatch" style="background:#ff9f43"></div>
+      <div class="swatch" style="background:#1fa463"></div>
+      <div class="swatch" style="background:#e5484d"></div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var jsStatus = document.getElementById("js-status");
+  jsStatus.textContent = "✅ JavaScript is running";
+  jsStatus.className = "status ok";
+
+  var count = 0;
+  var countEl = document.getElementById("count");
+  document.getElementById("inc").addEventListener("click", function () {
+    count++;
+    countEl.textContent = count;
+    countEl.classList.remove("bump");
+    void countEl.offsetWidth;
+    countEl.classList.add("bump");
+  });
+
+  var themeBtn = document.getElementById("theme");
+  themeBtn.addEventListener("click", function () {
+    var dark = document.body.classList.toggle("dark");
+    themeBtn.textContent = dark ? "Switch to light" : "Switch to dark";
+  });
+
+  var clock = document.getElementById("clock");
+  function tick() { clock.textContent = new Date().toLocaleTimeString(); }
+  tick();
+  setInterval(tick, 1000);
+
+  function setStatus(el, ok, text) {
+    el.textContent = (ok ? "✅ " : "❌ ") + text;
+    el.className = "status " + (ok ? "ok" : "fail");
+  }
+
+  document.getElementById("protocol").textContent = location.protocol + "//" + (location.host || "(local file)");
+
+  function readCookie(name) {
+    var match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  function runCookieTest() {
+    var el = document.getElementById("cookie-status");
+    var token = String(Date.now());
+    var expires = new Date(Date.now() + 30 * 24 * 3600 * 1000).toUTCString();
+    try {
+      document.cookie = "iosTest=" + token + "; expires=" + expires + "; path=/; SameSite=Lax";
+      if (readCookie("iosTest") === token) {
+        setStatus(el, true, "Cookie written and read back");
+      } else {
+        setStatus(el, false, "Cookie write was ignored (common for file:// pages)");
+      }
+      var visits = parseInt(readCookie("iosVisits") || "0", 10) + 1;
+      document.cookie = "iosVisits=" + visits + "; expires=" + expires + "; path=/; SameSite=Lax";
+      document.getElementById("cookie-visits").textContent =
+        readCookie("iosVisits") === String(visits) ? visits : "not persisted";
+    } catch (e) {
+      setStatus(el, false, "Cookie error: " + e.message);
+    }
+
+    try {
+      var ls = parseInt(localStorage.getItem("iosVisits") || "0", 10) + 1;
+      localStorage.setItem("iosVisits", ls);
+      document.getElementById("ls-visits").textContent = ls;
+    } catch (e) {
+      document.getElementById("ls-visits").textContent = "unavailable (" + e.name + ")";
+    }
+  }
+
+  document.getElementById("cookie-test").addEventListener("click", runCookieTest);
+  document.getElementById("cookie-clear").addEventListener("click", function () {
+    document.cookie = "iosTest=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    document.cookie = "iosVisits=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    try { localStorage.removeItem("iosVisits"); } catch (e) {}
+    document.getElementById("cookie-status").textContent = "Cleared";
+    document.getElementById("cookie-status").className = "status";
+    document.getElementById("cookie-visits").textContent = "–";
+    document.getElementById("ls-visits").textContent = "–";
+  });
+  runCookieTest();
+
+  document.getElementById("google-test").addEventListener("click", function () {
+    var fetchEl = document.getElementById("fetch-status");
+    var imgEl = document.getElementById("img-status");
+    fetchEl.textContent = "⏳ Calling…";
+    fetchEl.className = "status";
+    imgEl.textContent = "⏳ Loading…";
+    imgEl.className = "status";
+
+    // Google sends no CORS headers, so "no-cors" is the only mode that can succeed.
+    // The response is opaque: success means the request reached Google, but the body is unreadable.
+    var started = Date.now();
+    fetch("https://www.google.com/?t=" + started, { mode: "no-cors", cache: "no-store" })
+      .then(function (res) {
+        setStatus(fetchEl, true, "Reached google.com in " + (Date.now() - started) + " ms (response type: " + res.type + ")");
+      })
+      .catch(function (e) {
+        setStatus(fetchEl, false, "Fetch failed: " + e.message);
+      });
+
+    var img = new Image();
+    img.width = 32;
+    img.height = 32;
+    img.onload = function () {
+      setStatus(imgEl, true, "Loaded google.com/favicon.ico");
+      var holder = document.getElementById("img-holder");
+      holder.innerHTML = "";
+      holder.appendChild(img);
+    };
+    img.onerror = function () {
+      setStatus(imgEl, false, "Could not load google.com/favicon.ico");
+    };
+    img.src = "https://www.google.com/favicon.ico?t=" + started;
+  });
+
+  document.querySelectorAll(".swatch").forEach(function (s) {
+    s.addEventListener("click", function () {
+      document.body.style.setProperty("--accent", s.style.backgroundColor);
+    });
+  });
+})();
+</script>
+</body>
+</html>
